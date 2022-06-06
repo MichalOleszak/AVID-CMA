@@ -1,6 +1,6 @@
 resume: false
 test_only: false
-num_workers: 12
+num_workers: 0
 
 required_devices: 1
 no_test: false

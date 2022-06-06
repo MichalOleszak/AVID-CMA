@@ -96,6 +96,7 @@ class VideoDataset(data.Dataset):
         if self.mode == 'clip':
             try:
                 sample_idx = index % self.num_samples
+
                 video_ctr, audio_ctr = self._load_sample(sample_idx)
                 v_ss, v_dur, a_ss, a_dur = self._sample_snippet(video_ctr, audio_ctr)
                 sample = self._get_clip(sample_idx, video_ctr, audio_ctr, v_ss, a_ss, video_clip_duration=v_dur, audio_clip_duration=a_dur)

@@ -90,10 +90,10 @@ class AVIDSimilarityMemoryBank(nn.Module):
         self.register_buffer('view2_mem', torch.randn(num_items, embedding_dim))
 
         self.view1_mem = F.normalize(self.view1_mem, p=2, dim=1)
-        self.view1_mem = self.view1_mem.cuda(self.device)
+        # self.view1_mem = self.view1_mem.cuda(self.device)
 
         self.view2_mem = F.normalize(self.view2_mem, p=2, dim=1)
-        self.view2_mem = self.view2_mem.cuda(self.device)
+        # self.view2_mem = self.view2_mem.cuda(self.device)
 
         if self.distributed:
             dist.broadcast(self.view1_mem, 0)
@@ -176,7 +176,7 @@ class AVID(nn.Module):
             wModal=wModal_coeff>0.,
             device=device
         )
-        self.nce_average = self.nce_average.cuda(device)
+        # self.nce_average = self.nce_average.cuda(device)
 
         sum_coeff = (xModal_coeff + wModal_coeff)
         self.xModal_coeff = xModal_coeff / sum_coeff

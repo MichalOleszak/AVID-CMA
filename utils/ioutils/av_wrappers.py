@@ -108,7 +108,10 @@ def av_laod_audio(container, audio_fps=None, start_time=0, duration=None):
     if t > data.shape[1]:
         data = np.pad(data, ((0, 0), (0, t-data.shape[1])), 'constant', constant_values=0)
     data = data[:, ss: ss+t]
-    data = data / np.iinfo(data.dtype).max
+    try:
+        data = data / np.iinfo(data.dtype).max
+    except:
+        data = data / np.finfo(data.dtype).max
 
     return data, audio_fps
 

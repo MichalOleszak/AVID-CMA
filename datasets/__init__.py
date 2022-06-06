@@ -7,5 +7,6 @@
 
 from .audioset import AudioSet
 from .kinetics import Kinetics
+from .youcook2 import YouCook2
 from .ucf import UCF
 from .hmdb import HMDB

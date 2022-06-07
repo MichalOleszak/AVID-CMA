@@ -15,7 +15,7 @@ print_freq: 1
 dataset:
   name: "youcook2"
   full_res: true
-  batch_size: 256
+  batch_size: 128
   video_clip_duration: 0.5
   video_fps: 16.
   crop_size: 224

@@ -190,7 +190,7 @@ def run_phase(phase, loader, model, optimizer, criterion, epoch, args, cfg, logg
             progress.display(i+1)
             if tb_writter is not None:
                 for key in loss_debug:
-                    tb_writter.add_scalar('{}-batch/{}'.format(phase, key), loss_debug[key].item(), step)
+                    tb_writter.add_scalar('{}-batch/{}'.format(phase, key), loss_debug[key], step)
 
     # Sync metrics across all GPUs and print final averages
     if args.distributed:

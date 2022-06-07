@@ -10,7 +10,9 @@ import glob
 import numpy as np
 
 
-DATA_PATH = "/cluster-polyaxon/users/molesz/data/youcookii/videos_sliced"
+DATA_PATH = "../research/data/youcookii/videos_sliced"
+# DATA_PATH = "../research/data/youcookii_sliced_sample"
+# DATA_PATH = "/cluster-polyaxon/users/molesz/data/youcookii/videos_sliced"
 
 
 from datasets.video_db import VideoDataset

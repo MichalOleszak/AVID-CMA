@@ -98,6 +98,7 @@ def main_worker(gpu, ngpus_per_node, args, cfg):
     # Define criterion
     device = args.gpu if args.gpu is not None else 0
     cfg['loss']['args']['embedding_dim'] = model.module.out_dim
+    # cfg['loss']['args']['embedding_dim'] = model._modules["video_model"].out_dim
     cfg['loss']['args']['device'] = device
     train_criterion = main_utils.build_criterion(cfg['loss'], logger=logger)
 

@@ -89,7 +89,7 @@ def av_laod_audio(container, audio_fps=None, start_time=0, duration=None):
         try:
             frame.pts = None
             if resample:
-                np_snd = audio_resampler.resample(frame).to_ndarray()
+                np_snd = audio_resampler.resample(frame)[0].to_ndarray()
             else:
                 np_snd = frame.to_ndarray()
             data += [np_snd]

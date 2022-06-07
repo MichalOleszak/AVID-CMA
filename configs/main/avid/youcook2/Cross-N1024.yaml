@@ -15,7 +15,7 @@ print_freq: 1
 dataset:
   name: "youcook2"
   full_res: true
-  batch_size: 8
+  batch_size: 256
   video_clip_duration: 0.5
   video_fps: 16.
   crop_size: 224
@@ -37,7 +37,7 @@ dataset:
 optimizer:
   name: "adam"
   weight_decay: 0.00001
-  num_epochs: 2
+  num_epochs: 30
   lr:
     name: "multistep"
     base_lr: 0.0002
@@ -60,8 +60,8 @@ model:
 loss:
   name: "AVID"
   args:
-    num_data: 232067
-    num_negatives: 1024
+    num_data: 1660
+    num_negatives: 256
     momentum: 0.5
     xModal_coeff: 1.
     wModal_coeff: 0.

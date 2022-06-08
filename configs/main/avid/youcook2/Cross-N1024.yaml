@@ -46,7 +46,7 @@ optimizer:
 
 model:
   name: "Cross-N1024"
-  model_dir: "/cluster-polyaxon/users/molesz/avid/checkpoints"
+  model_dir: "/cluster-home/polyaxon/users/molesz/avid/checkpoints"
   arch: "av_wrapper"
   args:
     proj_dim: [512, 512, 128]

@@ -10,8 +10,12 @@ import glob
 import numpy as np
 
 
-DATA_PATH = '/data/datasets/kinetics/'
-
+# DATA_PATH = '/data/datasets/kinetics'
+# notebook:
+# DATA_PATH = "../../research/data/kinetics400/videos_sliced"
+DATA_PATH = "../../research/data/kinetics400/videos_sliced_sample"
+# sauron:
+DATA_PATH = "/cluster-home/polyaxon/users/molesz/datasets/kinetics400/videos_raw_sample"
 
 from datasets.video_db import VideoDataset
 class Kinetics(VideoDataset):
@@ -33,8 +37,10 @@ class Kinetics(VideoDataset):
                  ):
 
         classes = sorted(os.listdir(f"{DATA_PATH}/{subset}"))
-        filenames = ['/'.join(fn.split('/')[-2:]) for fn in glob.glob(f"{DATA_PATH}/{subset}/*/*.mp4")]
-        labels = [classes.index(fn.split('/')[-2]) for fn in filenames]
+        # filenames = ['/'.join(fn.split('/')[-2:]) for fn in glob.glob(f"{DATA_PATH}/{subset}/*/*.mp4")]
+        # labels = [classes.index(fn.split('/')[-2]) for fn in filenames]
+        filenames = ['/'.join(fn.split('/')[-1:]) for fn in glob.glob(f"{DATA_PATH}/{subset}/*.mp4")]
+        labels = ["_".join(fn.split("_")[:-1]) + f"?{fn.split('_')[-1].replace('.mp4', '')}" for fn in filenames]
 
         super(Kinetics, self).__init__(
             return_video=return_video,

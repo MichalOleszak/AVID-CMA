@@ -99,7 +99,7 @@ def save_codings(vid, aud, subset, output_dp):
 
 def main(checkpoint_path, output_dp):
     model = load_model(checkpoint_path)
-    for subset in ["val", "test"]:
+    for subset in ["validate", "test"]:
         dl, len_dataset = get_dataloader(subset)
         codings_video, codings_audio = calculate_embeddings(model, dl, len_dataset)
         save_codings(vid=codings_video, aud=codings_audio, subset=subset, output_dp=output_dp)

@@ -64,7 +64,7 @@ def get_dataloader(subset):
     )
     dataloader = torch.utils.data.DataLoader(
         dataset,
-        batch_size=64,
+        batch_size=32,
         shuffle=False,
         drop_last=False,
         num_workers=0,

@@ -111,7 +111,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--checkpoint_path",
         type=str,
-        default="/cluster-home/polyaxon/users/molesz/checkpoints/avid-cma-kinetics400/checkpoint.pth.tar"
+        default="/cluster-polyaxon/users/molesz/checkpoints/avid-cma-kinetics400/checkpoint.pth.tar"
     )
     args = parser.parse_args()
     main(

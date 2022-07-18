@@ -16,7 +16,7 @@ def load_model(checkpoint_path):
         rank = -1
         quiet = False
     args = Args()
-    cfg = yaml.safe_load(open("../configs/main/avid-cma/kinetics/InstX-N1024-PosW-N64-Top32.yaml"))
+    cfg = yaml.safe_load(open("configs/main/avid-cma/kinetics/InstX-N1024-PosW-N64-Top32.yaml"))
     logger, tb_writter, model_dir = main_utils.prep_environment(args, cfg)
     cfg['model']['args']['checkpoint'] = checkpoint_path
     model = main_utils.build_model(cfg['model'], logger)

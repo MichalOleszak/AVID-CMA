@@ -1,6 +1,7 @@
 import argparse
 import os
 
+from datetime import datetime
 import numpy as np
 import torch
 import yaml
@@ -90,8 +91,8 @@ def calculate_embeddings(model, dataloader, len_dataset):
 
 
 def save_codings(vid, aud, subset, output_dp):
-    vid_path = os.path.join(output_dp, f"video_encoding_{subset}.pt")
-    aud_path = os.path.join(output_dp, f"audio_encoding_{subset}.pt")
+    vid_path = os.path.join(output_dp, f"{str(datetime.now())[:10]}_video_encoding_{subset}.pt")
+    aud_path = os.path.join(output_dp, f"{str(datetime.now())[:10]}_audio_encoding_{subset}.pt")
     torch.save(vid, vid_path)
     torch.save(aud, aud_path)
 

@@ -13,7 +13,7 @@ import numpy as np
 # local:
 # DATA_PATH = "../michal-oleszak-research/datasets/kinetics400/videos_sliced"
 # sauron:
-DATA_PATH = "/cluster-home/polyaxon/users/molesz/datasets/kinetics400/videos_sliced"
+DATA_PATH = "/cluster-polyaxon/users/molesz/datasets/kinetics400/videos_sliced"
 
 from datasets.video_db import VideoDataset
 class Kinetics(VideoDataset):

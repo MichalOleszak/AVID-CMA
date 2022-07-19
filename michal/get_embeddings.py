@@ -26,7 +26,7 @@ def load_model(checkpoint_path):
     return model
 
 
-def get_dataloader(subset):
+def get_dataloader(subset, batch_size):
     video_transform = preprocessing.VideoPrep_MSC_CJ(
         crop=(224, 224),
         augment=False,
@@ -38,12 +38,14 @@ def get_dataloader(subset):
             trim_pad=True,
             duration=2,
             augment=False,
-            missing_as_zero=True),
+            missing_as_zero=True
+        ),
         preprocessing.LogSpectrogram(
             24000,
             n_fft=512,
             hop_size=1. / 100,
-            normalize=True)
+            normalize=True
+        )
     ]
     dataset = datasets.Kinetics(
         subset=subset,
@@ -64,7 +66,7 @@ def get_dataloader(subset):
     )
     dataloader = torch.utils.data.DataLoader(
         dataset,
-        batch_size=2,
+        batch_size=batch_size,
         shuffle=False,
         drop_last=False,
         num_workers=0,
@@ -74,7 +76,7 @@ def get_dataloader(subset):
     return dataloader, len(dataset)
 
 
-def calculate_embeddings(model, dataloader, len_dataset):
+def calculate_embeddings(model, dataloader, len_dataset, batch_size):
     labels_test = []
     codings_video = []
     codings_audio = []
@@ -84,7 +86,7 @@ def calculate_embeddings(model, dataloader, len_dataset):
             codings_video.append(logits[0])
             codings_audio.append(logits[1])
             labels_test += [l.split("?")[-1] for l in sample["label"]]
-            print(f"{np.round(100 * ((len(codings_video) * 64) / len_dataset), 2)}%")
+            print(f"{np.round(100 * ((len(codings_video) * batch_size) / len_dataset), 2)}%")
     codings_video = torch.vstack(codings_video)
     codings_audio = torch.vstack(codings_audio)
     return codings_video, codings_audio
@@ -97,12 +99,12 @@ def save_codings(vid, aud, subset, output_dp):
     torch.save(aud, aud_path)
 
 
-def main(checkpoint_path, output_dp):
+def main(checkpoint_path, output_dp, splits, batch_size):
     model = load_model(checkpoint_path)
-    for subset in ["validate", "test"]:
-        dl, len_dataset = get_dataloader(subset)
+    for subset in splits:
+        dl, len_dataset = get_dataloader(subset, batch_size)
         with torch.no_grad():
-            codings_video, codings_audio = calculate_embeddings(model, dl, len_dataset)
+            codings_video, codings_audio = calculate_embeddings(model, dl, len_dataset, batch_size)
         save_codings(vid=codings_video, aud=codings_audio, subset=subset, output_dp=output_dp)
 
 
@@ -114,8 +116,12 @@ if __name__ == "__main__":
         type=str,
         default="/cluster-polyaxon/users/molesz/checkpoints/avid-cma-kinetics400/checkpoint.pth.tar"
     )
+    parser.add_argument("--splits", nargs="+", default=["validate", "test"])
+    parser.add_argument("--batch_size", type=int, default=64)
     args = parser.parse_args()
     main(
         checkpoint_path=args.checkpoint_path,
         output_dp=args.output_dp,
+        splits=args.splits,
+        batch_size=args.batch_size,
     )

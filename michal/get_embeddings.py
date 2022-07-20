@@ -77,7 +77,7 @@ def get_dataloader(subset, batch_size):
 
 
 def calculate_embeddings(model, dataloader, len_dataset, batch_size):
-    labels_test = []
+    labels = []
     codings_video = []
     codings_audio = []
     for sample in dataloader:
@@ -85,18 +85,22 @@ def calculate_embeddings(model, dataloader, len_dataset, batch_size):
             logits = model(sample["frames"], sample["audio"])
             codings_video.append(logits[0])
             codings_audio.append(logits[1])
-            labels_test += [l.split("?")[-1] for l in sample["label"]]
+            labels += [l.split("?")[-1] for l in sample["label"]]
             print(f"{np.round(100 * ((len(codings_video) * batch_size) / len_dataset), 2)}%")
     codings_video = torch.vstack(codings_video)
     codings_audio = torch.vstack(codings_audio)
-    return codings_video, codings_audio
+    return codings_video, codings_audio, labels
 
 
-def save_codings(vid, aud, subset, output_dp):
+def save_codings(vid, aud, lab, subset, output_dp):
     vid_path = os.path.join(output_dp, f"{str(datetime.now())[:10]}_video_encoding_{subset}.pt")
     aud_path = os.path.join(output_dp, f"{str(datetime.now())[:10]}_audio_encoding_{subset}.pt")
+    lab_path = os.path.join(output_dp, f"{str(datetime.now())[:10]}_labels_{subset}.txt")
     torch.save(vid, vid_path)
     torch.save(aud, aud_path)
+    with open(lab_path, "w") as f:
+        for l in lab:
+            f.write("%s\n" % l)
 
 
 def main(checkpoint_path, output_dp, splits, batch_size):
@@ -104,8 +108,8 @@ def main(checkpoint_path, output_dp, splits, batch_size):
     for subset in splits:
         dl, len_dataset = get_dataloader(subset, batch_size)
         with torch.no_grad():
-            codings_video, codings_audio = calculate_embeddings(model, dl, len_dataset, batch_size)
-        save_codings(vid=codings_video, aud=codings_audio, subset=subset, output_dp=output_dp)
+            codings_video, codings_audio, labels = calculate_embeddings(model, dl, len_dataset, batch_size)
+        save_codings(vid=codings_video, aud=codings_audio, lab=labels, subset=subset, output_dp=output_dp)
 
 
 if __name__ == "__main__":
@@ -114,7 +118,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--checkpoint_path",
         type=str,
-        default="/cluster-polyaxon/users/molesz/checkpoints/avid-cma-kinetics400/checkpoint.pth.tar"
+        default="/cluster-polyaxon/users/molesz/checkpoints/avid-cma-kinetics400/checkpoint.pth.tar",
+        # default="checkpoints/AVID-CMA/kinetics/Cross-N1024/checkpoint.pth.tar"
     )
     parser.add_argument("--splits", nargs="+", default=["validate", "test"])
     parser.add_argument("--batch_size", type=int, default=64)

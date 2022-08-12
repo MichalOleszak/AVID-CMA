@@ -90,10 +90,12 @@ class AVIDSimilarityMemoryBank(nn.Module):
         self.register_buffer('view2_mem', torch.randn(num_items, embedding_dim))
 
         self.view1_mem = F.normalize(self.view1_mem, p=2, dim=1)
-        self.view1_mem = self.view1_mem.cuda(self.device)
+        # ON POLYAXON
+        # self.view1_mem = self.view1_mem.cuda(self.device)
 
         self.view2_mem = F.normalize(self.view2_mem, p=2, dim=1)
-        self.view2_mem = self.view2_mem.cuda(self.device)
+        # ON POLYAXON
+        # self.view2_mem = self.view2_mem.cuda(self.device)
 
         if self.distributed:
             dist.broadcast(self.view1_mem, 0)

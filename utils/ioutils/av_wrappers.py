@@ -89,7 +89,7 @@ def av_laod_audio(container, audio_fps=None, start_time=0, duration=None):
         try:
             frame.pts = None
             if resample:
-                np_snd = audio_resampler.resample(frame).to_ndarray()
+                np_snd = audio_resampler.resample(frame)[0].to_ndarray()
             else:
                 np_snd = frame.to_ndarray()
             data += [np_snd]
@@ -108,7 +108,10 @@ def av_laod_audio(container, audio_fps=None, start_time=0, duration=None):
     if t > data.shape[1]:
         data = np.pad(data, ((0, 0), (0, t-data.shape[1])), 'constant', constant_values=0)
     data = data[:, ss: ss+t]
-    data = data / np.iinfo(data.dtype).max
+    try:
+        data = data / np.iinfo(data.dtype).max
+    except:
+        data = data / np.finfo(data.dtype).max
 
     return data, audio_fps
 

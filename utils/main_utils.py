@@ -189,6 +189,8 @@ def build_dataloader(db_cfg, split_cfg, num_workers, distributed):
         dataset = datasets.AudioSet
     elif db_cfg['name'] == 'kinetics':
         dataset = datasets.Kinetics
+    elif db_cfg['name'] == 'youcook2':
+        dataset = datasets.YouCook2
     else:
         raise ValueError('Unknown dataset')
 

@@ -7,8 +7,8 @@
 
 from datasets.video_db import VideoDataset
 
-DATA_PATH = '/data/datasets/UCF101/data'
-ANNO_PATH = '/data/datasets/UCF101/ucfTrainTestlist/'
+DATA_PATH = "../michal-oleszak-research/datasets/ucf101/videos_raw"
+ANNO_PATH = "../michal-oleszak-research/datasets/ucf101/ucfTrainTestlist"
 
 
 class UCF(VideoDataset):

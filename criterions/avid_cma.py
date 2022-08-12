@@ -221,7 +221,8 @@ class AVIDSimilarityPositiveExpansion(AVIDSimilarityMemoryBank):
         # Find CMA correspondences. Only do this on one process if running in distributed mode and sync at the end.
         if positive_set is not None:
             self.register_buffer('positive_set', torch.from_numpy(positive_set).int())
-            self.positive_set = self.positive_set.cuda(self.device)
+            # ON POLYAXON:
+            # self.positive_set = self.positive_set.cuda(self.device)
             if self.distributed:
                 dist.broadcast(self.positive_set, 0)
 
@@ -291,7 +292,8 @@ class AVID_CMA(nn.Module):
             sampling_args=sampling_args,
             device=device
         )
-        self.nce_average = self.nce_average.cuda(device)
+        # ON POLYAXON:
+        # self.nce_average = self.nce_average.cuda(device)
 
         # Loss coefficients
         sum_coeff = xModalInstCoeff + wModalInstCoeff + xModalPosCoeff + wModalPosCoeff

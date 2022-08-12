@@ -26,7 +26,7 @@ def load_model(checkpoint_path):
     return model
 
 
-def get_dataloader(subset, batch_size):
+def get_dataloader(subset, batch_size, dataset_name):
     video_transform = preprocessing.VideoPrep_MSC_CJ(
         crop=(224, 224),
         augment=False,
@@ -47,23 +47,38 @@ def get_dataloader(subset, batch_size):
             normalize=True
         )
     ]
-    dataset = datasets.Kinetics(
-        subset=subset,
-        return_video=True,
-        video_clip_duration=0.5,
-        video_fps=16,
-        video_transform=video_transform,
-        return_audio=True,
-        audio_clip_duration=2,
-        audio_fps=24000,
-        audio_fps_out=64,
-        audio_transform=audio_transform,
-        max_offsync_augm=0,
-        return_labels=True,
-        return_index=True,
-        mode='clip',
-        clips_per_video=10,
-    )
+    if dataset_name == "kinetics":
+        dataset = datasets.Kinetics(
+            subset=subset,
+            return_video=True,
+            video_clip_duration=0.5,
+            video_fps=16,
+            video_transform=video_transform,
+            return_audio=True,
+            audio_clip_duration=2,
+            audio_fps=24000,
+            audio_fps_out=64,
+            audio_transform=audio_transform,
+            max_offsync_augm=0,
+            return_labels=True,
+            return_index=True,
+            mode='clip',
+            clips_per_video=10,
+        )
+    elif dataset_name == "ucf":
+        dataset = datasets.UCF(
+            subset=subset,
+            return_video=True,
+            video_clip_duration=0.5,
+            video_fps=16,
+            video_transform=video_transform,
+            max_offsync_augm=0,
+            return_labels=True,
+            mode='clip',
+            clips_per_video=10,
+        )
+    else:
+        raise Exception(f"Dataset {dataset_name} not supported")
     dataloader = torch.utils.data.DataLoader(
         dataset,
         batch_size=batch_size,
@@ -82,10 +97,14 @@ def calculate_embeddings(model, dataloader, len_dataset, batch_size):
     codings_audio = []
     for sample in dataloader:
         with torch.no_grad():
-            logits = model(sample["frames"], sample["audio"])
+            if "audio" in sample.keys():
+                logits = model(sample["frames"], sample["audio"])
+                labels += [l.split("?")[-1] for l in sample["label"]]
+            else:
+                logits = model(sample["frames"], torch.zeros(size=[8, 1, 200, 257]))
+                labels += sample["label"]
             codings_video.append(logits[0])
             codings_audio.append(logits[1])
-            labels += [l.split("?")[-1] for l in sample["label"]]
             print(f"{np.round(100 * ((len(codings_video) * batch_size) / len_dataset), 2)}%")
     codings_video = torch.vstack(codings_video)
     codings_audio = torch.vstack(codings_audio)
@@ -103,10 +122,10 @@ def save_codings(vid, aud, lab, subset, output_dp):
             f.write("%s\n" % l)
 
 
-def main(checkpoint_path, output_dp, splits, batch_size):
+def main(checkpoint_path, output_dp, splits, batch_size, dataset_name):
     model = load_model(checkpoint_path)
     for subset in splits:
-        dl, len_dataset = get_dataloader(subset, batch_size)
+        dl, len_dataset = get_dataloader(subset, batch_size, dataset_name)
         with torch.no_grad():
             codings_video, codings_audio, labels = calculate_embeddings(model, dl, len_dataset, batch_size)
         save_codings(vid=codings_video, aud=codings_audio, lab=labels, subset=subset, output_dp=output_dp)
@@ -115,11 +134,12 @@ def main(checkpoint_path, output_dp, splits, batch_size):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--output_dp", type=str, required=True)
+    parser.add_argument("--dataset_name", type=str, required=True)
     parser.add_argument(
         "--checkpoint_path",
         type=str,
-        default="/cluster-polyaxon/users/molesz/checkpoints/avid-cma-kinetics400/checkpoint.pth.tar",
-        # default="checkpoints/AVID-CMA/kinetics/Cross-N1024/checkpoint.pth.tar"
+        # default="/cluster-polyaxon/users/molesz/checkpoints/avid-cma-kinetics400/checkpoint.pth.tar",
+        default="checkpoints/AVID-CMA/kinetics/Cross-N1024/checkpoint.pth.tar"
     )
     parser.add_argument("--splits", nargs="+", default=["validate", "test"])
     parser.add_argument("--batch_size", type=int, default=64)
@@ -129,4 +149,5 @@ if __name__ == "__main__":
         output_dp=args.output_dp,
         splits=args.splits,
         batch_size=args.batch_size,
+        dataset_name=args.dataset_name,
     )

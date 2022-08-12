@@ -12,7 +12,9 @@ import numpy as np
 
 # DATA_PATH = "../research/data/youcookii/videos_sliced"
 # DATA_PATH = "../research/data/youcookii_sliced_sample"
-DATA_PATH = "/cluster-polyaxon/users/molesz/data/youcookii/videos_sliced"
+# DATA_PATH = "/cluster-polyaxon/users/molesz/data/youcookii/videos_sliced"
+# notebook:
+DATA_PATH = "../../research/data/youcookii/videos_sliced"
 
 
 from datasets.video_db import VideoDataset
@@ -38,7 +40,7 @@ class YouCook2(VideoDataset):
         # filenames = ['/'.join(fn.split('/')[-2:]) for fn in glob.glob(f"{DATA_PATH}/{subset}/*/*.mp4")]
         # labels = [classes.index(fn.split('/')[-2]) for fn in filenames]
         filenames = ['/'.join(fn.split('/')[-1:]) for fn in glob.glob(f"{DATA_PATH}/{subset}/*.mp4")]
-        labels = [classes.index(fn.split('/')[-1]) for fn in filenames]
+        labels = ["_".join(fn.split("_")[:-1]) for fn in filenames]
 
         super(YouCook2, self).__init__(
             return_video=return_video,

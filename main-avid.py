@@ -97,8 +97,12 @@ def main_worker(gpu, ngpus_per_node, args, cfg):
 
     # Define criterion
     device = args.gpu if args.gpu is not None else 0
-    cfg['loss']['args']['embedding_dim'] = model.module.out_dim
-    # cfg['loss']['args']['embedding_dim'] = model._modules["video_model"].out_dim
+    # ------------------
+    # POLYAXON:
+    # cfg['loss']['args']['embedding_dim'] = model.module.out_dim
+    # LOCALLY:
+    cfg['loss']['args']['embedding_dim'] = model._modules["video_model"].out_dim
+    # ------------------
     cfg['loss']['args']['device'] = device
     train_criterion = main_utils.build_criterion(cfg['loss'], logger=logger)
 
@@ -159,9 +163,10 @@ def run_phase(phase, loader, model, optimizer, criterion, epoch, args, cfg, logg
 
         # Prepare batch
         video, audio, index = sample['frames'], sample['audio'], sample['index']
-        video = video.cuda(device, non_blocking=True)
-        audio = audio.cuda(device, non_blocking=True)
-        index = index.cuda(device, non_blocking=True)
+        # ON POLYAXON:
+        # video = video.cuda(device, non_blocking=True)
+        # audio = audio.cuda(device, non_blocking=True)
+        # index = index.cuda(device, non_blocking=True)
 
         # compute audio and video embeddings
         if phase == 'train':

@@ -13,7 +13,7 @@ from datasets.video_db import VideoDataset
 from michal.michal_utils import is_running_on_polyaxon
 
 if is_running_on_polyaxon():
-    DATA_PATH = "/cluster-polyaxon/users/molesz/datasets/audioset/videos_sliced"
+    DATA_PATH = "/cluster-polyaxon/users/molesz/datasets/audioset/videos_sliced_0905"
 else:
     DATA_PATH = "../michal-oleszak-research/datasets/audioset/videos_sliced"
 

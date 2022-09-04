@@ -9,14 +9,16 @@ import yaml
 import datasets
 from datasets import preprocessing
 from utils import main_utils
+from michal import config
 
 
-def load_model(checkpoint_path):
+def load_model(checkpoint_path, dataset_name):
     class Args:
         rank = -1
         quiet = False
     args = Args()
-    cfg = yaml.safe_load(open("configs/main/avid-cma/kinetics/InstX-N1024-PosW-N64-Top32.yaml"))
+    config_yaml_filepath = f"configs/main/avid-cma/{dataset_name}/InstX-N1024-PosW-N64-Top32.yaml"
+    cfg = yaml.safe_load(open(config_yaml_filepath))
     logger, tb_writter, model_dir = main_utils.prep_environment(args, cfg)
     cfg['model']['args']['checkpoint'] = checkpoint_path
     model = main_utils.build_model(cfg['model'], logger)
@@ -65,15 +67,21 @@ def get_dataloader(subset, batch_size, dataset_name):
             mode='clip',
             clips_per_video=10,
         )
-    elif dataset_name == "ucf":
-        dataset = datasets.UCF(
+    elif dataset_name == "audioset":
+        dataset = datasets.AudioSet(
             subset=subset,
             return_video=True,
             video_clip_duration=0.5,
             video_fps=16,
             video_transform=video_transform,
+            return_audio=True,
+            audio_clip_duration=2,
+            audio_fps=24000,
+            audio_fps_out=64,
+            audio_transform=audio_transform,
             max_offsync_augm=0,
             return_labels=True,
+            return_index=True,
             mode='clip',
             clips_per_video=10,
         )
@@ -123,7 +131,7 @@ def save_codings(vid, aud, lab, subset, output_dp):
 
 
 def main(checkpoint_path, output_dp, splits, batch_size, dataset_name):
-    model = load_model(checkpoint_path)
+    model = load_model(checkpoint_path, dataset_name)
     for subset in splits:
         dl, len_dataset = get_dataloader(subset, batch_size, dataset_name)
         with torch.no_grad():
@@ -138,14 +146,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--checkpoint_path",
         type=str,
-        # default="/cluster-polyaxon/users/molesz/checkpoints/avid-cma-kinetics400/checkpoint.pth.tar",
-        default="checkpoints/AVID-CMA/kinetics/Cross-N1024/checkpoint.pth.tar"
+        default="AVID-CMA/kinetics/Cross-N1024/checkpoint.pth.tar"
     )
     parser.add_argument("--splits", nargs="+", default=["validate", "test"])
     parser.add_argument("--batch_size", type=int, default=64)
     args = parser.parse_args()
     main(
-        checkpoint_path=args.checkpoint_path,
+        checkpoint_path=os.path.join(config.DIRPATH_CHECKPOINTS, args.checkpoint_path),
         output_dp=args.output_dp,
         splits=args.splits,
         batch_size=args.batch_size,

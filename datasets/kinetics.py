@@ -9,13 +9,15 @@ import os
 import glob
 import numpy as np
 
-
-# local:
-DATA_PATH = "../michal-oleszak-research/datasets/kinetics400/videos_sliced"
-# sauron:
-# DATA_PATH = "/cluster-polyaxon/users/molesz/datasets/kinetics400/videos_sliced"
-
 from datasets.video_db import VideoDataset
+from michal.michal_utils import is_running_on_polyaxon
+
+if is_running_on_polyaxon():
+    DATA_PATH = "/cluster-polyaxon/users/molesz/datasets/kinetics400/videos_sliced"
+else:
+    DATA_PATH = "../michal-oleszak-research/datasets/kinetics400/videos_sliced"
+
+
 class Kinetics(VideoDataset):
     def __init__(self, subset,
                  return_video=True,

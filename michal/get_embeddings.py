@@ -99,10 +99,11 @@ def get_dataloader(subset, batch_size, dataset_name):
     return dataloader, len(dataset)
 
 
-def calculate_embeddings(model, dataloader, len_dataset, batch_size):
+def calculate_embeddings(model, dataloader, len_dataset, batch_size, num_samples=None):
     labels = []
     codings_video = []
     codings_audio = []
+    counter = 0
     for sample in dataloader:
         with torch.no_grad():
             if "audio" in sample.keys():
@@ -114,6 +115,9 @@ def calculate_embeddings(model, dataloader, len_dataset, batch_size):
             codings_video.append(logits[0])
             codings_audio.append(logits[1])
             print(f"{np.round(100 * ((len(codings_video) * batch_size) / len_dataset), 2)}%")
+            counter += 1
+            if counter == num_samples:
+                break
     codings_video = torch.vstack(codings_video)
     codings_audio = torch.vstack(codings_audio)
     return codings_video, codings_audio, labels
@@ -130,12 +134,14 @@ def save_codings(vid, aud, lab, subset, output_dp):
             f.write("%s\n" % l)
 
 
-def main(checkpoint_path, output_dp, splits, batch_size, dataset_name):
+def main(checkpoint_path, output_dp, splits, batch_size, dataset_name, num_samples):
     model = load_model(checkpoint_path, dataset_name)
     for subset in splits:
         dl, len_dataset = get_dataloader(subset, batch_size, dataset_name)
         with torch.no_grad():
-            codings_video, codings_audio, labels = calculate_embeddings(model, dl, len_dataset, batch_size)
+            codings_video, codings_audio, labels = calculate_embeddings(
+                model, dl, len_dataset, batch_size, num_samples
+            )
         save_codings(vid=codings_video, aud=codings_audio, lab=labels, subset=subset, output_dp=output_dp)
 
 
@@ -150,6 +156,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--splits", nargs="+", default=["validate", "test"])
     parser.add_argument("--batch_size", type=int, default=64)
+    parser.add_argument("--num_samples", type=int, required=False)
     args = parser.parse_args()
     main(
         checkpoint_path=os.path.join(config.DIRPATH_CHECKPOINTS, args.checkpoint_path),
@@ -157,4 +164,5 @@ if __name__ == "__main__":
         splits=args.splits,
         batch_size=args.batch_size,
         dataset_name=args.dataset_name,
+        num_samples=args.num_samples,
     )
